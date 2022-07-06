@@ -1,5 +1,17 @@
 const DOMAIN = "http://localhost:3001/";
 
+const DEFAULT_STYLES = {
+  height: "50px",
+  width: "100px",
+  "background-color": "lightblue",
+  "border-radius": "10px",
+  cursor: "pointer",
+};
+
+const DEFAULT_TEXT = "Click Here";
+
+const DEFAULT_SAMPLE_SIZE = 5;
+
 const objectToCSS = (object) => {
   let cssText = "";
   Object.keys(object).forEach((property) => {
@@ -9,22 +21,11 @@ const objectToCSS = (object) => {
   return cssText;
 };
 
-defaultStyles = {
-  height: "50px",
-  width: "100px",
-  "background-color": "lightblue",
-  cursor: "pointer",
-};
-
-defaultText = "Click Here";
-
 class MagicButton extends HTMLButtonElement {
   constructor() {
     super();
-    this.style.cssText = objectToCSS(defaultStyles);
-    this.innerHTML = defaultText;
-    this._onClick = () => console.log("click");
-    this._onHover = () => console.log("hover");
+    this.style.cssText = objectToCSS(DEFAULT_STYLES);
+    this.innerHTML = DEFAULT_TEXT;
     this._id;
   }
 
@@ -45,18 +46,45 @@ class MagicButton extends HTMLButtonElement {
     console.log(resData);
   }
 
+  async logHover() {
+    let url = DOMAIN + "magic-button/hover";
+    let reqData = {
+      id: this._id,
+      action: "log-hover",
+    };
+    let response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(reqData),
+    });
+    let { resData } = await response.json();
+    console.log(resData);
+  }
+
   addClickAction() {
-    this.addEventListener("click", this._onClick);
     this.addEventListener("click", this.logClick);
   }
 
   addHoverAction() {
-    this.addEventListener("pointerover", this._onHover);
-    // this.addEventListener("pointerover", this._onHover);
+    this.addEventListener("pointerover", this.logHover);
   }
 
-  async init(data) {
+  async init(textOptions, startStyles, lockedStyles, sampleSize) {
+    //textOptions ARRAY
+    //startStyles OBJECT
+    //loackedStyles OBJECT
+    //sampleSize NUMBER
+
     let url = DOMAIN + "magic-button/init";
+    let data = {
+      textOptions: textOptions || [DEFAULT_TEXT],
+      startStyles: startStyles || DEFAULT_STYLES,
+      lockedStyles: lockedStyles || {},
+      sampleSize: sampleSize || DEFAULT_SAMPLE_SIZE,
+    };
+    console.log(data);
     let response = await fetch(url, {
       method: "POST",
       headers: {
@@ -78,7 +106,9 @@ class MagicButton extends HTMLButtonElement {
     console.log(button);
     this._id = id;
     this.style.cssText = objectToCSS(button.versions[0].style);
+    this.innerHTML = button.versions[0].text;
     this.addClickAction();
+    this.addHoverAction();
     return "loaded";
   }
 }
@@ -87,21 +117,30 @@ customElements.define("magic-button", MagicButton, { extends: "button" });
 
 const button = new MagicButton();
 
-const magicButtonInit = async (options) => {
-  let id = await button.init(options);
+const magicButtonInit = async (
+  textOptions,
+  startStyles,
+  lockedStyles,
+  sampleSize
+) => {
+  let id = await button.init(
+    textOptions,
+    startStyles,
+    lockedStyles,
+    sampleSize
+  );
   console.log(id);
 };
-let exampleInitData = {
+
+let exampleStartText = ["Start Now", "Free Trial"];
+
+let exampleStartStyles = {
   height: "100px",
   width: "100px",
   "background-color": "red",
   cursor: "pointer",
 };
 
-// magicButtonInit(exampleInitData);
-button.load("a3bb5036-e9ea-403a-b517-7935f9e93643");
+// magicButtonInit(exampleStartText, exampleStartStyles);
+button.load("2c55317d-9b61-41f6-aef5-e31bd7452d16");
 document.body.append(button);
-
-setTimeout(() => {
-  console.log(button._id);
-}, 3000);
