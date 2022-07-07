@@ -1,16 +1,20 @@
-const DOMAIN = "http://localhost:3001/";
+const SERVER_DOMAIN =
+  "https://magic-button.onrender.com" || "http://localhost:3001/";
 
 const DEFAULT_STYLES = {
-  height: "50px",
-  width: "100px",
+  height: "70px",
+  width: "200px",
   "background-color": "lightblue",
   "border-radius": "10px",
+  "font-size": "2em",
   cursor: "pointer",
 };
 
 const DEFAULT_TEXT = "Click Here";
 
-const DEFAULT_SAMPLE_SIZE = 5;
+const DEFAULT_COLOR = "lightblue";
+
+const DEFAULT_SAMPLE_SIZE = 3;
 
 const objectToCSS = (object) => {
   let cssText = "";
@@ -30,7 +34,7 @@ class MagicButton extends HTMLButtonElement {
   }
 
   async logClick() {
-    let url = DOMAIN + "magic-button/click";
+    let url = SERVER_DOMAIN + "magic-button/click";
     let reqData = {
       id: this._id,
       action: "log-click",
@@ -47,7 +51,7 @@ class MagicButton extends HTMLButtonElement {
   }
 
   async logHover() {
-    let url = DOMAIN + "magic-button/hover";
+    let url = SERVER_DOMAIN + "magic-button/hover";
     let reqData = {
       id: this._id,
       action: "log-hover",
@@ -71,15 +75,17 @@ class MagicButton extends HTMLButtonElement {
     this.addEventListener("pointerover", this.logHover);
   }
 
-  async init(textOptions, startStyles, lockedStyles, sampleSize) {
+  async init(textOptions, colorOptions, startStyles, lockedStyles, sampleSize) {
     //textOptions ARRAY
+    //colorOptions ARRAY
     //startStyles OBJECT
     //loackedStyles OBJECT
     //sampleSize NUMBER
 
-    let url = DOMAIN + "magic-button/init";
+    let url = SERVER_DOMAIN + "magic-button/init";
     let data = {
       textOptions: textOptions || [DEFAULT_TEXT],
+      colorOptions: colorOptions || [DEFAULT_COLOR],
       startStyles: startStyles || DEFAULT_STYLES,
       lockedStyles: lockedStyles || {},
       sampleSize: sampleSize || DEFAULT_SAMPLE_SIZE,
@@ -98,49 +104,19 @@ class MagicButton extends HTMLButtonElement {
   }
 
   async load(id) {
-    let url = DOMAIN + "magic-button/load";
+    let url = SERVER_DOMAIN + "magic-button/load";
     let response = await fetch(url, {
       headers: { Authentication: id },
     });
-    let button = await response.json();
-    console.log(button);
+    let currentTest = await response.json();
+    console.log(currentTest);
     this._id = id;
-    this.style.cssText = objectToCSS(button.versions[0].style);
-    this.innerHTML = button.versions[0].text;
+    this.style.cssText = objectToCSS(currentTest.styles);
+    this.innerHTML = currentTest.text;
     this.addClickAction();
     this.addHoverAction();
-    return "loaded";
+    return this;
   }
 }
 
 customElements.define("magic-button", MagicButton, { extends: "button" });
-
-const button = new MagicButton();
-
-const magicButtonInit = async (
-  textOptions,
-  startStyles,
-  lockedStyles,
-  sampleSize
-) => {
-  let id = await button.init(
-    textOptions,
-    startStyles,
-    lockedStyles,
-    sampleSize
-  );
-  console.log(id);
-};
-
-let exampleStartText = ["Start Now", "Free Trial"];
-
-let exampleStartStyles = {
-  height: "100px",
-  width: "100px",
-  "background-color": "red",
-  cursor: "pointer",
-};
-
-// magicButtonInit(exampleStartText, exampleStartStyles);
-button.load("2c55317d-9b61-41f6-aef5-e31bd7452d16");
-document.body.append(button);
