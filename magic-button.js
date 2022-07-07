@@ -1,5 +1,5 @@
 const SERVER_DOMAIN =
-  "https://magic-button.onrender.com" || "http://localhost:3001/";
+  "https://magic-button.onrender.com/" || "http://localhost:3001/";
 
 const DEFAULT_STYLES = {
   height: "70px",
