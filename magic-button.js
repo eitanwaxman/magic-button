@@ -1,5 +1,5 @@
-const SERVER_DOMAIN =
-  "https://magic-button.onrender.com/" || "http://localhost:3001/";
+const SERVER_DOMAIN = "https://magic-button.onrender.com/";
+//   "http://localhost:3001/"|| ;
 
 const DEFAULT_STYLES = {
   height: "70px",
@@ -14,7 +14,7 @@ const DEFAULT_TEXT = "Click Here";
 
 const DEFAULT_COLOR = "lightblue";
 
-const DEFAULT_SAMPLE_SIZE = 3;
+const DEFAULT_SAMPLE_SIZE = 10;
 
 const objectToCSS = (object) => {
   let cssText = "";
@@ -108,7 +108,7 @@ class MagicButton extends HTMLButtonElement {
     let response = await fetch(url, {
       headers: { Authentication: id },
     });
-    let currentTest = await response.json();
+    let { currentTest } = await response.json();
     console.log(currentTest);
     this._id = id;
     this.style.cssText = objectToCSS(currentTest.styles);
